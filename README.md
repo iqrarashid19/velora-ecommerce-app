@@ -31,61 +31,15 @@ A modern and responsive e-commerce mobile application built with **Flutter and D
 ```text
 lib/
 ├── data/
-│   ├── categories.dart
-│   └── products.dart
-│
 ├── models/
-│   ├── cart_item.dart
-│   ├── category.dart
-│   ├── order.dart
-│   └── product.dart
-│
 ├── providers/
-│   ├── address_provider.dart
-│   ├── cart_provider.dart
-│   ├── favorites_provider.dart
-│   └── order_provider.dart
-│
 ├── screens/
-│   ├── cart_screen.dart
-│   ├── checkout_screen.dart
-│   ├── favorites_screen.dart
-│   ├── home.dart
-│   ├── order_details_screen.dart
-│   ├── order_success_screen.dart
-│   ├── orders_screen.dart
-│   ├── product_details_screen.dart
-│   ├── products_screen.dart
-│   ├── profile_screen.dart
-│   ├── search_results_screen.dart
-│   └── splash_screen.dart
-│
 ├── theme/
-│   └── app_theme.dart
-│
 ├── widgets/
-│   ├── add_to_cart_button.dart
-│   ├── address_form.dart
-│   ├── category_item.dart
-│   ├── favorite_button.dart
-│   ├── greeting_header.dart
-│   ├── order_card.dart
-│   ├── payment_method_selector.dart
-│   ├── payment_option.dart
-│   ├── product_card.dart
-│   ├── promo_banner.dart
-│   ├── search_bar.dart
-│   └── section_title.dart
-│
 └── main.dart
 
 assets/
 └── images/
-    └── banners/
-        ├── headphones.png
-        ├── shoes.png
-        └── smartwatch.png
-```
 
 ## 🚀 Getting Started
 
