@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
-
+import 'package:e_commerce_app/screens/home.dart';
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -41,11 +41,12 @@ class _SignupScreenState extends State<SignupScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account created successfully!'),
-        ),
-      );
+Navigator.pushReplacement(
+  context,
+  MaterialPageRoute(
+    builder: (context) => const HomeScreen(),
+  ),
+);
     } on FirebaseAuthException catch (e) {
       String message = 'Something went wrong. Please try again.';
 
