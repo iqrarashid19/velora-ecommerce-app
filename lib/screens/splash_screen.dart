@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'package:e_commerce_app/screens/home.dart';
+import 'package:e_commerce_app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -46,14 +48,30 @@ class _SplashScreenState extends State<SplashScreen>
       const Duration(seconds: 3),
       () {
         if (!mounted) return;
-Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(),
-      ),
-    );
+
+        _checkUser();
       },
     );
+  }
+
+  void _checkUser() {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const LoginScreen(),
+        ),
+      );
+    }
   }
 
   @override
