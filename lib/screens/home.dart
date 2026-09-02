@@ -10,15 +10,16 @@ import 'package:e_commerce_app/screens/cart_screen.dart';
 import 'package:e_commerce_app/screens/orders_screen.dart';
 import 'package:e_commerce_app/screens/product_details_screen.dart';
 import 'package:e_commerce_app/screens/products_screen.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
-
+import 'package:e_commerce_app/services/firestore_service.dart';
 import 'package:e_commerce_app/widgets/category_item.dart';
 import 'package:e_commerce_app/widgets/greeting_header.dart';
 import 'package:e_commerce_app/widgets/product_card.dart';
 import 'package:e_commerce_app/widgets/promo_banner.dart';
 import 'package:e_commerce_app/widgets/search_bar.dart';
 import 'package:e_commerce_app/widgets/section_title.dart';
+import 'package:e_commerce_app/models/product.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -29,9 +30,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _searchQuery = '';
+  List<Product> _products = [];
+  bool _isLoadingProducts = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    final products = await FirestoreService.fetchProducts();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _products = products;
+      _isLoadingProducts = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final filteredProducts = featuredProducts.where((product) {
+    final filteredProducts = _products.where((product) {
       final query = _searchQuery.trim().toLowerCase();
 
       if (query.isEmpty) {
@@ -180,9 +203,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 // ------------------------------------------------
                 // GREETING
                 // ------------------------------------------------
-                const GreetingHeader(userName: 'Iqra'),
+                GreetingHeader(
+                  userName:
+                      FirebaseAuth.instance.currentUser?.displayName ?? 'User',
+                ),
 
-                const SizedBox(height:16),
+                const SizedBox(height: 16),
 
                 // ------------------------------------------------
                 // SEARCH BAR
@@ -213,16 +239,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 // ------------------------------------------------
                 // PROMO BANNER
                 // ------------------------------------------------
-             const AnimatedPromoBanner(),
+                const AnimatedPromoBanner(),
 
-                const SizedBox(height:16),
+                const SizedBox(height: 16),
 
                 // ------------------------------------------------
                 // CATEGORIES TITLE
                 // ------------------------------------------------
                 const SectionTitle(title: 'Categories'),
 
-                const SizedBox(height:16),
+                const SizedBox(height: 16),
 
                 // ------------------------------------------------
                 // CATEGORIES LIST
@@ -259,47 +285,53 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
 
-                const SizedBox(height:2),
+                const SizedBox(height: 2),
 
                 // ------------------------------------------------
                 // FEATURED PRODUCTS TITLE
                 // ------------------------------------------------
                 SectionTitle(title: 'Featured Products', onSeeAll: () {}),
 
-                const SizedBox(height:2),
+                const SizedBox(height: 2),
 
                 // ------------------------------------------------
                 // FEATURED PRODUCTS
                 // ------------------------------------------------
-                SizedBox(
-                  height:300,
-                  child: ListView.separated(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: filteredProducts.length,
-
-                    separatorBuilder: (context, index) {
-                      return const SizedBox(width: 16);
-                    },
-
-                    itemBuilder: (context, index) {
-                      final product = filteredProducts[index];
-
-                      return ProductCard(
-                        product: product,
-
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductDetailsScreen(product: product),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                if (_isLoadingProducts)
+                  const SizedBox(
+                    height: 300,
+                    child: Center(child: CircularProgressIndicator()),
                   ),
-                ),
+                if (!_isLoadingProducts)
+                  SizedBox(
+                    height: 300,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: filteredProducts.length,
+
+                      separatorBuilder: (context, index) {
+                        return const SizedBox(width: 16);
+                      },
+
+                      itemBuilder: (context, index) {
+                        final product = filteredProducts[index];
+
+                        return ProductCard(
+                          product: product,
+
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ProductDetailsScreen(product: product),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
               ],
             ),
           ),

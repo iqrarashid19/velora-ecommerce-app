@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
 import 'package:e_commerce_app/screens/home.dart';
+
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -35,18 +37,31 @@ class _SignupScreenState extends State<SignupScreen> {
         password: _passwordController.text.trim(),
       );
 
-      await credential.user?.updateDisplayName(
+      final user = credential.user;
+
+      await user?.updateDisplayName(
         _nameController.text.trim(),
       );
 
+      if (user != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .set({
+          'name': _nameController.text.trim(),
+          'email': user.email,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
       if (!mounted) return;
 
-Navigator.pushReplacement(
-  context,
-  MaterialPageRoute(
-    builder: (context) => const HomeScreen(),
-  ),
-);
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(),
+        ),
+      );
     } on FirebaseAuthException catch (e) {
       String message = 'Something went wrong. Please try again.';
 

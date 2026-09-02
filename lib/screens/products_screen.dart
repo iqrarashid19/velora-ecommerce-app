@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:e_commerce_app/data/products.dart';
+import 'package:e_commerce_app/models/product.dart';
+import 'package:e_commerce_app/services/firestore_service.dart';
 import 'package:e_commerce_app/widgets/product_card.dart';
 import 'package:e_commerce_app/screens/product_details_screen.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
@@ -20,12 +21,34 @@ class ProductsScreen extends StatefulWidget {
 class _ProductsScreenState extends State<ProductsScreen> {
   String _sortOption = 'Default';
 
+  List<Product> _products = [];
+  bool _isLoadingProducts = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    final products = await FirestoreService.fetchProducts();
+
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _products = products;
+      _isLoadingProducts = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     // Filter products according to selected category.
     final filteredProducts = widget.category == null
-        ? List.of(products)
-        : products
+        ? List.of(_products)
+        : _products
             .where(
               (product) => product.category == widget.category,
             )
@@ -208,49 +231,53 @@ class _ProductsScreenState extends State<ProductsScreen> {
       ),
 
       body: SafeArea(
-        child: filteredProducts.isEmpty
+        child: _isLoadingProducts
             ? const Center(
-                child: Text(
-                  'No products found.',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                child: CircularProgressIndicator(),
               )
-            : GridView.builder(
-                padding: const EdgeInsets.all(16),
+            : filteredProducts.isEmpty
+                ? const Center(
+                    child: Text(
+                      'No products found.',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  )
+                : GridView.builder(
+                    padding: const EdgeInsets.all(16),
 
-                gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 14,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.53,
-                ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 14,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.53,
+                    ),
 
-                itemCount: filteredProducts.length,
+                    itemCount: filteredProducts.length,
 
-                itemBuilder: (context, index) {
-                  final product = filteredProducts[index];
+                    itemBuilder: (context, index) {
+                      final product = filteredProducts[index];
 
-                  return ProductCard(
-                    product: product,
+                      return ProductCard(
+                        product: product,
 
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              ProductDetailsScreen(
-                            product: product,
-                          ),
-                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ProductDetailsScreen(
+                                product: product,
+                              ),
+                            ),
+                          );
+                        },
                       );
                     },
-                  );
-                },
-              ),
+                  ),
       ),
     );
   }
