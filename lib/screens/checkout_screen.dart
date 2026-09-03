@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:e_commerce_app/services/firestore_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:e_commerce_app/providers/cart_provider.dart';
 import 'package:e_commerce_app/providers/order_provider.dart';
 import 'package:e_commerce_app/providers/address_provider.dart';
@@ -102,7 +103,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  void _placeOrder() {
+  Future<void> _placeOrder() async {
     final addressProvider = context.read<AddressProvider>();
     final cart = context.read<CartProvider>();
 
@@ -135,6 +136,21 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final user = FirebaseAuth.instance.currentUser;
+
+    // Check user authentication.
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Please login before placing an order.',
+          ),
+        ),
+      );
+
+      return;
+    }
+
     final deliveryFee =
         cart.totalAmount >= 100 ? 0.0 : 5.0;
 
@@ -160,19 +176,42 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       orderDate: DateTime.now(),
     );
 
-    context.read<OrderProvider>().addOrder(order);
+    try {
+      await FirestoreService.saveOrder(
+        order,
+        user.uid,
+      );
 
-    cart.clearCart();
+      context.read<OrderProvider>().addOrder(order);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            OrderSuccessScreen(
-          orderId: order.id,
+      cart.clearCart();
+
+      if (!mounted) {
+        return;
+      }
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              OrderSuccessScreen(
+            orderId: order.id,
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Failed to place order. Please try again.',
+          ),
+        ),
+      );
+    }
   }
 
   @override

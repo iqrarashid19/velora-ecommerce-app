@@ -54,6 +54,28 @@ class OrderCard extends StatelessWidget {
                   ),
                 ),
 
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _statusColor(order.status)
+                        .withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    order.status,
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: _statusColor(order.status),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 8),
+
                 const Icon(
                   Icons.arrow_forward_ios_rounded,
                   size: 15,
@@ -133,6 +155,21 @@ class OrderCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return Colors.blue;
+      case 'shipped':
+        return Colors.orange;
+      case 'delivered':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 
   String _formatDate(DateTime date) {

@@ -11,6 +11,7 @@ class Order {
   final String postalCode;
   final String paymentMethod;
   final DateTime orderDate;
+  final String status;
 
   Order({
     required this.id,
@@ -23,5 +24,6 @@ class Order {
     required this.postalCode,
     required this.paymentMethod,
     required this.orderDate,
+    this.status = 'Pending',
   });
 }

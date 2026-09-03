@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:e_commerce_app/models/order.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
+
 class OrderDetailsScreen extends StatelessWidget {
   final Order order;
 
@@ -34,6 +35,41 @@ class OrderDetailsScreen extends StatelessWidget {
             Text(
               'Order Date: ${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}',
               style: TextStyle(color: Colors.grey.shade600),
+            ),
+
+            const SizedBox(height: 16),
+
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 14,
+                vertical: 10,
+              ),
+              decoration: BoxDecoration(
+                color: _statusColor(order.status)
+                    .withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.local_shipping_outlined,
+                    size: 19,
+                    color: _statusColor(order.status),
+                  ),
+
+                  const SizedBox(width: 8),
+
+                  Text(
+                    'Status: ${order.status}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: _statusColor(order.status),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 24),
@@ -163,5 +199,20 @@ class OrderDetailsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _statusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'confirmed':
+        return Colors.blue;
+      case 'shipped':
+        return Colors.orange;
+      case 'delivered':
+        return Colors.green;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
   }
 }

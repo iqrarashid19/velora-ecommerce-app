@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_commerce_app/screens/profile_screen.dart';
 import 'package:e_commerce_app/data/categories.dart';
-import 'package:e_commerce_app/data/products.dart';
+
 import 'package:e_commerce_app/screens/favorites_screen.dart';
 import 'package:e_commerce_app/providers/cart_provider.dart';
 import 'package:e_commerce_app/screens/search_results_screen.dart';
