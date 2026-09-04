@@ -128,5 +128,59 @@ class FirestoreService {
         status: data['status'] ?? 'Pending',
       );
     }).toList();
+ 
+  }
+    static Future<List<app_order.Order>> fetchAllOrders() async {
+    final snapshot = await FirebaseFirestore.instance
+        .collectionGroup('orders')
+        .orderBy('orderDate', descending: true)
+        .get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+
+      final items = (data['items'] as List<dynamic>? ?? []).map((item) {
+        final product = Product(
+          id: item['productId'] ?? '',
+          name: item['name'] ?? '',
+          imageUrl: item['imageUrl'] ?? '',
+          price: (item['price'] as num).toDouble(),
+          category: '',
+          description: '',
+          rating: 0,
+          discountPercentage:
+              item['discountPercentage'] != null
+                  ? (item['discountPercentage'] as num).toDouble()
+                  : null,
+        );
+
+        return CartItem(
+          product: product,
+          quantity: item['quantity'] ?? 1,
+        );
+      }).toList();
+
+      return app_order.Order(
+        id: data['id'] ?? doc.id,
+        items: items,
+        totalAmount: (data['totalAmount'] as num).toDouble(),
+        name: data['name'] ?? '',
+        phone: data['phone'] ?? '',
+        address: data['address'] ?? '',
+        city: data['city'] ?? '',
+        postalCode: data['postalCode'] ?? '',
+        paymentMethod: data['paymentMethod'] ?? '',
+        orderDate: (data['orderDate'] as Timestamp).toDate(),
+        status: data['status'] ?? 'Pending',
+      );
+    }).toList();
+  }
+  static Future<bool> isAdmin(String userId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .get();
+
+    return doc.data()?['isAdmin'] == true;
   }
 }

@@ -4,6 +4,8 @@ import 'package:e_commerce_app/theme/app_theme.dart';
 import 'package:e_commerce_app/screens/orders_screen.dart';
 import 'package:e_commerce_app/screens/favorites_screen.dart';
 import 'package:e_commerce_app/screens/login_screen.dart';
+import 'package:e_commerce_app/screens/admin_orders_screen.dart';
+import 'package:e_commerce_app/services/firestore_service.dart';
 import 'package:provider/provider.dart';
 import 'package:e_commerce_app/providers/address_provider.dart';
 import 'package:e_commerce_app/widgets/address_form.dart';
@@ -62,7 +64,7 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
-
+print('LOGGED IN USER UID: ${user?.uid}');
     final userName = user?.displayName?.trim().isNotEmpty == true
         ? user!.displayName!
         : 'Velora User';
@@ -182,6 +184,34 @@ class ProfileScreen extends StatelessWidget {
             ),
 
             // --------------------------------------------------
+            // ADMIN ORDERS
+            // --------------------------------------------------
+            if (user != null)
+              FutureBuilder<bool>(
+                future: FirestoreService.isAdmin(user.uid),
+                builder: (context, snapshot) {
+                  if (snapshot.data != true) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return _ProfileOption(
+                    icon: Icons.admin_panel_settings_outlined,
+                    title: 'Admin Orders',
+                    subtitle: 'Manage customer orders',
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              const AdminOrdersScreen(),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+
+            // --------------------------------------------------
             // DELIVERY ADDRESS
             // --------------------------------------------------
             _ProfileOption(
@@ -274,6 +304,9 @@ class ProfileScreen extends StatelessWidget {
   }
 }
 
+// --------------------------------------------------
+// PROFILE OPTION WIDGET
+// --------------------------------------------------
 class _ProfileOption extends StatelessWidget {
   final IconData icon;
   final String title;
