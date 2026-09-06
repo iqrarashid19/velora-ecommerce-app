@@ -3,6 +3,7 @@ import 'package:e_commerce_app/data/products.dart';
 import 'package:e_commerce_app/models/product.dart';
 import 'package:e_commerce_app/models/order.dart' as app_order;
 import 'package:e_commerce_app/models/cart_item.dart';
+
 class FirestoreService {
   static Future<void> uploadProducts() async {
     final firestore = FirebaseFirestore.instance;
@@ -81,7 +82,8 @@ class FirestoreService {
       }).toList(),
     });
   }
-   static Future<List<app_order.Order>> fetchOrders(
+
+  static Future<List<app_order.Order>> fetchOrders(
       String userId) async {
     final snapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -116,6 +118,7 @@ class FirestoreService {
 
       return app_order.Order(
         id: data['id'] ?? doc.id,
+        userId: data['userId'] ?? userId,
         items: items,
         totalAmount: (data['totalAmount'] as num).toDouble(),
         name: data['name'] ?? '',
@@ -128,15 +131,14 @@ class FirestoreService {
         status: data['status'] ?? 'Pending',
       );
     }).toList();
- 
   }
-    static Future<List<app_order.Order>> fetchAllOrders() async {
+
+  static Future<List<app_order.Order>> fetchAllOrders() async {
     final snapshot = await FirebaseFirestore.instance
         .collectionGroup('orders')
-        .orderBy('orderDate', descending: true)
         .get();
 
-    return snapshot.docs.map((doc) {
+    final orders = snapshot.docs.map((doc) {
       final data = doc.data();
 
       final items = (data['items'] as List<dynamic>? ?? []).map((item) {
@@ -162,6 +164,8 @@ class FirestoreService {
 
       return app_order.Order(
         id: data['id'] ?? doc.id,
+        userId: data['userId'] ??
+            doc.reference.parent.parent?.id,
         items: items,
         totalAmount: (data['totalAmount'] as num).toDouble(),
         name: data['name'] ?? '',
@@ -174,7 +178,28 @@ class FirestoreService {
         status: data['status'] ?? 'Pending',
       );
     }).toList();
+
+    orders.sort(
+      (a, b) => b.orderDate.compareTo(a.orderDate),
+    );
+
+    return orders;
   }
+
+  static Future<void> updateOrderStatus(
+      String userId,
+      String orderId,
+      String status) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('orders')
+        .doc(orderId)
+        .update({
+      'status': status,
+    });
+  }
+
   static Future<bool> isAdmin(String userId) async {
     final doc = await FirebaseFirestore.instance
         .collection('users')

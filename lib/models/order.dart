@@ -2,6 +2,7 @@ import 'package:e_commerce_app/models/cart_item.dart';
 
 class Order {
   final String id;
+  final String? userId;
   final List<CartItem> items;
   final double totalAmount;
   final String name;
@@ -15,6 +16,7 @@ class Order {
 
   Order({
     required this.id,
+    this.userId,
     required this.items,
     required this.totalAmount,
     required this.name,
