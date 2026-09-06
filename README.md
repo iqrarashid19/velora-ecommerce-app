@@ -126,7 +126,7 @@ Velora uses Firebase as its backend infrastructure.
 
 | Add Product | Admin Orders |
 |---|---|
-| ![Add Product](screenshots/add_product.png) | ![Admin Orders](screenshots/admin_orders.png) |
+| ![Add Product](screenshots/add_products.png) | ![Admin Orders](screenshots/admin_orders.png) |
 
 | Admin Order Detail |
 |---|
