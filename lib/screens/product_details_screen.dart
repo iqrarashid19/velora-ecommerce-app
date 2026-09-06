@@ -585,7 +585,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           ],
         ),
 
-        const SizedBox(height: 12),
+        const SizedBox(height:6),
 
         if (_isLoadingReviews)
           Container(
@@ -603,7 +603,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           _buildRatingSummary(),
 
           if (_reviews.isNotEmpty) ...[
-            const SizedBox(height: 18),
+            const SizedBox(height:2),
 
             const Text(
               'Customer Reviews',
@@ -734,9 +734,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                   20,
+                  14,
                   20,
                   20,
-                  30,
                 ),
                 child: Column(
                   crossAxisAlignment:
@@ -763,7 +763,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height:6),
 
                     Text(
                       product.name,
@@ -774,7 +774,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height:2),
 
                     Row(
                       children: [
@@ -802,7 +802,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 18),
+                    const SizedBox(height:6),
 
                     Row(
                       crossAxisAlignment:
@@ -832,7 +832,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ],
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height:10),
 
                     const Text(
                       'Description',
@@ -842,7 +842,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 10),
+                    const SizedBox(height:4),
 
                     Text(
                       product.description,
@@ -853,14 +853,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height:6),
 
                     // =========================
                     // REVIEWS
                     // =========================
                     _buildReviewsSection(),
 
-                    const SizedBox(height: 28),
+                    const SizedBox(height:6),
 
                     // =========================
                     // ADD TO CART

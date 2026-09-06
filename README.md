@@ -90,41 +90,47 @@ Velora uses Firebase as its backend infrastructure.
 
 ## 📱 Screenshots
 
-> Screenshots will be added to this section as the project showcase is finalized.
+### 🚀 Authentication & Home
 
-### Home
+| Splash Screen | Login |
+|---|---|
+| ![Splash Screen](screenshots/splash.png) | ![Login](screenshots/login.png) |
 
-`/screenshots/home.png`
+| Signup | Home |
+|---|---|
+| ![Signup](screenshots/signup.png) | ![Home](screenshots/home.png) |
 
-### Product Details
+### 🛍️ Shopping Experience
 
-`/screenshots/product_details.png`
+| Product Details | Cart / Checkout |
+|---|---|
+| ![Product Details](screenshots/product_details.png) | ![Cart Checkout](screenshots/cart_checkout.png) |
 
-### Cart & Checkout
+| Place Order | Order Confirmation |
+|---|---|
+| ![Place Order](screenshots/place_order.png) | ![Order Confirmation](screenshots/order_confirm.png) |
 
-`/screenshots/cart_checkout.png`
+| My Orders | Order Tracking |
+|---|---|
+| ![My Orders](screenshots/my_orders.png) | ![Order Tracking](screenshots/order_tracking.png) |
 
-### My Orders
+| Favorites | Profile |
+|---|---|
+| ![Favorites](screenshots/favorites.png) | ![Profile](screenshots/profile.png) |
 
-`/screenshots/my_orders.png`
+### 👨‍💼 Admin Dashboard
 
-### Order Tracking
+| Admin Dashboard | Manage Products |
+|---|---|
+| ![Admin Dashboard](screenshots/admin_dashboard.png) | ![Manage Products](screenshots/manage_products.png) |
 
-`/screenshots/order_tracking.png`
+| Add Product | Admin Orders |
+|---|---|
+| ![Add Product](screenshots/add_product.png) | ![Admin Orders](screenshots/admin_orders.png) |
 
-### Favorites
-
-`/screenshots/favorites.png`
-
-### Admin Dashboard
-
-`/screenshots/admin_dashboard.png`
-
-### Admin Order Management
-
-`/screenshots/admin_orders.png`
-
----
+| Admin Order Detail |
+|---|
+| ![Admin Order Detail](screenshots/admin_order_detail.png) |
 
 ## 🏗️ Project Structure
 
