@@ -14,12 +14,10 @@ class OrderDetailsScreen extends StatefulWidget {
   });
 
   @override
-  State<OrderDetailsScreen> createState() =>
-      _OrderDetailsScreenState();
+  State<OrderDetailsScreen> createState() => _OrderDetailsScreenState();
 }
 
-class _OrderDetailsScreenState
-    extends State<OrderDetailsScreen> {
+class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   late String _currentStatus;
   bool _isUpdating = false;
 
@@ -46,10 +44,11 @@ class _OrderDetailsScreenState
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-
         title: const Text(
           'Order Details',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
 
@@ -58,7 +57,6 @@ class _OrderDetailsScreenState
 
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
             Text(
               'Order #${widget.order.id}',
@@ -79,21 +77,21 @@ class _OrderDetailsScreenState
 
             const SizedBox(height: 16),
 
+            // --------------------------------------------------
+            // CURRENT STATUS
+            // --------------------------------------------------
             Container(
               padding: const EdgeInsets.symmetric(
                 horizontal: 14,
                 vertical: 10,
               ),
-
               decoration: BoxDecoration(
                 color: _statusColor(_currentStatus)
                     .withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
-
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-
                 children: [
                   Icon(
                     Icons.local_shipping_outlined,
@@ -115,6 +113,26 @@ class _OrderDetailsScreenState
               ),
             ),
 
+            const SizedBox(height: 24),
+
+            // --------------------------------------------------
+            // ORDER TRACKING
+            // --------------------------------------------------
+            const Text(
+              'Order Tracking',
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            _buildTrackingCard(),
+
+            // --------------------------------------------------
+            // ADMIN STATUS UPDATE
+            // --------------------------------------------------
             if (widget.isAdmin) ...[
               const SizedBox(height: 24),
 
@@ -133,12 +151,10 @@ class _OrderDetailsScreenState
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                 ),
-
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: _currentStatus,
@@ -166,8 +182,7 @@ class _OrderDetailsScreenState
                             }
 
                             if (widget.order.userId == null) {
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
                                   content: Text(
                                     'User ID not found for this order',
@@ -182,43 +197,40 @@ class _OrderDetailsScreenState
                             });
 
                             try {
-                              await FirestoreService
-                                  .updateOrderStatus(
+                              await FirestoreService.updateOrderStatus(
                                 widget.order.userId!,
                                 widget.order.id,
                                 value,
                               );
+
+                              if (!mounted) return;
 
                               setState(() {
                                 _currentStatus = value;
                                 _isUpdating = false;
                               });
 
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Order status updated to $value',
-                                    ),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Order status updated to $value',
                                   ),
-                                );
-                              }
+                                ),
+                              );
                             } catch (e) {
+                              if (!mounted) return;
+
                               setState(() {
                                 _isUpdating = false;
                               });
 
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context)
-                                    .showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Failed to update status: $e',
-                                    ),
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Failed to update status: $e',
                                   ),
-                                );
-                              }
+                                ),
+                              );
                             }
                           },
 
@@ -240,6 +252,9 @@ class _OrderDetailsScreenState
 
             const SizedBox(height: 24),
 
+            // --------------------------------------------------
+            // ITEMS
+            // --------------------------------------------------
             const Text(
               'Items',
               style: TextStyle(
@@ -253,7 +268,6 @@ class _OrderDetailsScreenState
             ...widget.order.items.map((item) {
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
-
                 padding: const EdgeInsets.all(14),
 
                 decoration: BoxDecoration(
@@ -286,6 +300,9 @@ class _OrderDetailsScreenState
 
             const SizedBox(height: 16),
 
+            // --------------------------------------------------
+            // DELIVERY ADDRESS
+            // --------------------------------------------------
             const Text(
               'Delivery Address',
               style: TextStyle(
@@ -298,7 +315,6 @@ class _OrderDetailsScreenState
 
             Container(
               width: double.infinity,
-
               padding: const EdgeInsets.all(16),
 
               decoration: BoxDecoration(
@@ -320,6 +336,9 @@ class _OrderDetailsScreenState
 
             const SizedBox(height: 24),
 
+            // --------------------------------------------------
+            // PAYMENT METHOD
+            // --------------------------------------------------
             const Text(
               'Payment Method',
               style: TextStyle(
@@ -332,7 +351,6 @@ class _OrderDetailsScreenState
 
             Container(
               width: double.infinity,
-
               padding: const EdgeInsets.all(16),
 
               decoration: BoxDecoration(
@@ -351,6 +369,9 @@ class _OrderDetailsScreenState
 
             const SizedBox(height: 24),
 
+            // --------------------------------------------------
+            // TOTAL
+            // --------------------------------------------------
             const Text(
               'Total',
               style: TextStyle(
@@ -363,7 +384,6 @@ class _OrderDetailsScreenState
 
             Container(
               width: double.infinity,
-
               padding: const EdgeInsets.all(18),
 
               decoration: BoxDecoration(
@@ -400,6 +420,237 @@ class _OrderDetailsScreenState
         ),
       ),
     );
+  }
+
+  // ==========================================================
+  // ORDER TRACKING CARD
+  // ==========================================================
+
+  Widget _buildTrackingCard() {
+    // Cancelled order gets a separate tracking state.
+    if (_currentStatus.toLowerCase() == 'cancelled') {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(20),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+
+        child: Column(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.10),
+                shape: BoxShape.circle,
+              ),
+
+              child: const Icon(
+                Icons.cancel_outlined,
+                color: Colors.red,
+                size: 28,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            const Text(
+              'Order Cancelled',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.bold,
+                color: Colors.red,
+              ),
+            ),
+
+            const SizedBox(height: 6),
+
+            Text(
+              'This order has been cancelled.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final trackingStatuses = [
+      'Pending',
+      'Confirmed',
+      'Shipped',
+      'Delivered',
+    ];
+
+    int currentIndex = trackingStatuses.indexWhere(
+      (status) =>
+          status.toLowerCase() ==
+          _currentStatus.toLowerCase(),
+    );
+
+    // If an unknown status is found, keep Pending active.
+    if (currentIndex == -1) {
+      currentIndex = 0;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+
+      child: Column(
+        children: List.generate(
+          trackingStatuses.length,
+          (index) {
+            final status = trackingStatuses[index];
+
+            final bool isCompleted = index <= currentIndex;
+            final bool isCurrent = index == currentIndex;
+            final bool isLast =
+                index == trackingStatuses.length - 1;
+
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 250),
+
+                      width: isCurrent ? 42 : 34,
+                      height: isCurrent ? 42 : 34,
+
+                      decoration: BoxDecoration(
+                        color: isCompleted
+                            ? AppTheme.primary
+                            : Colors.grey.shade200,
+                        shape: BoxShape.circle,
+
+                        border: isCurrent
+                            ? Border.all(
+                                color: AppTheme.primary
+                                    .withValues(alpha: 0.20),
+                                width: 5,
+                              )
+                            : null,
+                      ),
+
+                      child: Icon(
+                        _trackingIcon(status),
+                        size: isCurrent ? 21 : 18,
+                        color: isCompleted
+                            ? Colors.white
+                            : Colors.grey.shade500,
+                      ),
+                    ),
+
+                    if (!isLast)
+                      Container(
+                        width: 2,
+                        height: 38,
+                        color: index < currentIndex
+                            ? AppTheme.primary
+                            : Colors.grey.shade200,
+                      ),
+                  ],
+                ),
+
+                const SizedBox(width: 14),
+
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      top: 5,
+                      bottom: 25,
+                    ),
+
+                    child: Column(
+                      crossAxisAlignment:
+                          CrossAxisAlignment.start,
+
+                      children: [
+                        Text(
+                          status,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: isCurrent
+                                ? FontWeight.bold
+                                : FontWeight.w600,
+                            color: isCompleted
+                                ? Colors.black87
+                                : Colors.grey.shade500,
+                          ),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        Text(
+                          _trackingDescription(status),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: isCompleted
+                                ? Colors.grey.shade600
+                                : Colors.grey.shade400,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  IconData _trackingIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Icons.schedule_rounded;
+
+      case 'confirmed':
+        return Icons.check_circle_outline_rounded;
+
+      case 'shipped':
+        return Icons.local_shipping_outlined;
+
+      case 'delivered':
+        return Icons.home_rounded;
+
+      default:
+        return Icons.circle_outlined;
+    }
+  }
+
+  String _trackingDescription(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return 'Your order has been placed and is awaiting confirmation.';
+
+      case 'confirmed':
+        return 'Your order has been confirmed and is being prepared.';
+
+      case 'shipped':
+        return 'Your order is on its way to you.';
+
+      case 'delivered':
+        return 'Your order has been successfully delivered.';
+
+      default:
+        return '';
+    }
   }
 
   Color _statusColor(String status) {

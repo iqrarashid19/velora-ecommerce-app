@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:e_commerce_app/screens/product_details_screen.dart';
 import 'package:e_commerce_app/providers/favorites_provider.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
 import 'package:e_commerce_app/widgets/product_card.dart';
@@ -22,9 +22,7 @@ class FavoritesScreen extends StatelessWidget {
         elevation: 0,
         title: const Text(
           'Favorites',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
       ),
 
@@ -41,26 +39,20 @@ class FavoritesScreen extends StatelessWidget {
                   SizedBox(height: 16),
                   Text(
                     'No favorites yet',
-                    style: TextStyle(
-                      fontSize: 19,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 6),
                   Text(
                     'Add products you love to your favorites.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey,
-                    ),
+                    style: TextStyle(color: Colors.grey),
                   ),
                 ],
               ),
             )
           : GridView.builder(
               padding: const EdgeInsets.all(16),
-              gridDelegate:
-                  const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 14,
                 mainAxisSpacing: 14,
@@ -72,6 +64,14 @@ class FavoritesScreen extends StatelessWidget {
 
                 return ProductCard(
                   product: product,
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ProductDetailsScreen(product: product),
+                      ),
+                    );
+                  },
                 );
               },
             ),

@@ -1,21 +1,28 @@
-import 'package:e_commerce_app/theme/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:e_commerce_app/models/product.dart';
 import 'package:provider/provider.dart';
+import 'package:e_commerce_app/models/product.dart';
 import 'package:e_commerce_app/providers/cart_provider.dart';
+import 'package:e_commerce_app/providers/favorites_provider.dart';
+import 'package:e_commerce_app/screens/cart_screen.dart';
+import 'package:e_commerce_app/theme/app_theme.dart';
 
 class ProductDetailsScreen extends StatelessWidget {
   final Product product;
 
-  const ProductDetailsScreen({super.key, required this.product});
+  const ProductDetailsScreen({
+    super.key,
+    required this.product,
+  });
 
   @override
   Widget build(BuildContext context) {
     final discountedPrice =
         product.price * (1 - (product.discountPercentage ?? 0) / 100);
 
+    final isFavorite = context.watch<FavoritesProvider>().isFavorite(product.id);
+
     return Scaffold(
-      backgroundColor:AppTheme.background,
+      backgroundColor: AppTheme.background,
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
@@ -26,9 +33,33 @@ class ProductDetailsScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
         actions: [
+          // Favorite
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              context.read<FavoritesProvider>().toggleFavorite(product);
+            },
+            icon: Icon(
+              isFavorite
+                  ? Icons.favorite
+                  : Icons.favorite_border,
+            ),
+            tooltip: isFavorite
+                ? 'Remove from favorites'
+                : 'Add to favorites',
+          ),
+
+          // Cart
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CartScreen(),
+                ),
+              );
+            },
             icon: const Icon(Icons.shopping_cart_outlined),
+            tooltip: 'Cart',
           ),
         ],
       ),
@@ -37,7 +68,6 @@ class ProductDetailsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Product Image
               Stack(
                 children: [
                   SizedBox(
@@ -83,7 +113,6 @@ class ProductDetailsScreen extends StatelessWidget {
                 ],
               ),
 
-              // Product Information
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
                 child: Column(
@@ -110,7 +139,7 @@ class ProductDetailsScreen extends StatelessWidget {
 
                     const SizedBox(height: 12),
 
-                    // Name
+                    // Product Name
                     Text(
                       product.name,
                       style: const TextStyle(
@@ -125,7 +154,11 @@ class ProductDetailsScreen extends StatelessWidget {
                     // Rating
                     Row(
                       children: [
-                        const Icon(Icons.star, color: Colors.amber, size: 20),
+                        const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 20,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           product.rating.toString(),
@@ -159,7 +192,6 @@ class ProductDetailsScreen extends StatelessWidget {
                             color: Color(0xFF171717),
                           ),
                         ),
-
                         if (product.discountPercentage != null) ...[
                           const SizedBox(width: 10),
                           Text(
@@ -213,7 +245,9 @@ class ProductDetailsScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        icon: const Icon(Icons.shopping_cart_outlined),
+                        icon: const Icon(
+                          Icons.shopping_cart_outlined,
+                        ),
                         label: const Text(
                           'Add to Cart',
                           style: TextStyle(

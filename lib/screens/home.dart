@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import 'package:e_commerce_app/screens/profile_screen.dart';
 import 'package:e_commerce_app/data/categories.dart';
-
 import 'package:e_commerce_app/screens/favorites_screen.dart';
 import 'package:e_commerce_app/providers/cart_provider.dart';
+import 'package:e_commerce_app/providers/favorites_provider.dart';
 import 'package:e_commerce_app/screens/search_results_screen.dart';
 import 'package:e_commerce_app/screens/cart_screen.dart';
 import 'package:e_commerce_app/screens/orders_screen.dart';
@@ -38,8 +39,16 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
     _loadProducts();
     _checkAdmin();
+
+    // Load user's Firebase favorites after HomeScreen is ready
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
+      context.read<FavoritesProvider>().loadFavorites();
+    });
   }
 
   Future<void> _loadProducts() async {

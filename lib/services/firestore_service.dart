@@ -199,7 +199,70 @@ class FirestoreService {
       'status': status,
     });
   }
+  static Future<void> addProduct(Product product) async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(product.id)
+        .set({
+      'id': product.id,
+      'name': product.name,
+      'imageUrl': product.imageUrl,
+      'price': product.price,
+      'category': product.category,
+      'description': product.description,
+      'rating': product.rating,
+      'discountPercentage': product.discountPercentage,
+    });
+  }
 
+  static Future<void> updateProduct(Product product) async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(product.id)
+        .update({
+      'name': product.name,
+      'imageUrl': product.imageUrl,
+      'price': product.price,
+      'category': product.category,
+      'description': product.description,
+      'rating': product.rating,
+      'discountPercentage': product.discountPercentage,
+    });
+  }
+
+  static Future<void> deleteProduct(String productId) async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .delete();
+  }
+
+  static Future<Product?> fetchProductById(String productId) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    final data = doc.data()!;
+
+    return Product(
+      id: data['id'] ?? doc.id,
+      name: data['name'] ?? '',
+      imageUrl: data['imageUrl'] ?? '',
+      price: (data['price'] as num).toDouble(),
+      category: data['category'] ?? '',
+      description: data['description'] ?? '',
+      rating: (data['rating'] as num).toDouble(),
+      discountPercentage:
+          data['discountPercentage'] != null
+              ? (data['discountPercentage'] as num).toDouble()
+              : null,
+    );
+  }
   static Future<bool> isAdmin(String userId) async {
     final doc = await FirebaseFirestore.instance
         .collection('users')
@@ -207,5 +270,69 @@ class FirestoreService {
         .get();
 
     return doc.data()?['isAdmin'] == true;
+  }
+  // =========================
+  // FAVORITES
+  // =========================
+
+  static Future<void> saveFavorite(
+    String userId,
+    Product product,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .doc(product.id)
+        .set({
+      'id': product.id,
+      'name': product.name,
+      'imageUrl': product.imageUrl,
+      'price': product.price,
+      'category': product.category,
+      'description': product.description,
+      'rating': product.rating,
+      'discountPercentage': product.discountPercentage,
+    });
+  }
+
+  static Future<void> removeFavorite(
+    String userId,
+    String productId,
+  ) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .doc(productId)
+        .delete();
+  }
+
+  static Future<List<Product>> fetchFavorites(
+    String userId,
+  ) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('favorites')
+        .get();
+
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+
+      return Product(
+        id: data['id'] ?? doc.id,
+        name: data['name'] ?? '',
+        imageUrl: data['imageUrl'] ?? '',
+        price: (data['price'] as num).toDouble(),
+        category: data['category'] ?? '',
+        description: data['description'] ?? '',
+        rating: (data['rating'] as num).toDouble(),
+        discountPercentage:
+            data['discountPercentage'] != null
+                ? (data['discountPercentage'] as num).toDouble()
+                : null,
+      );
+    }).toList();
   }
 }

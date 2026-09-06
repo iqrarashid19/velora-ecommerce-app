@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:e_commerce_app/theme/app_theme.dart';
 import 'package:e_commerce_app/services/firestore_service.dart';
 import 'package:e_commerce_app/models/order.dart';
+import 'package:e_commerce_app/models/product.dart';
 import 'package:e_commerce_app/widgets/order_card.dart';
 import 'package:e_commerce_app/screens/order_details_screen.dart';
 import 'package:e_commerce_app/screens/admin_orders_screen.dart';
+import 'package:e_commerce_app/screens/admin_products_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -37,7 +39,7 @@ class _AdminDashboardScreenState
     );
 
     _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.15),
+      begin: const Offset(0, 0.10),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(
@@ -59,16 +61,18 @@ class _AdminDashboardScreenState
     return await FirestoreService.fetchAllOrders();
   }
 
+  Future<List<Product>> _loadProducts() async {
+    return await FirestoreService.fetchProducts();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
-
       appBar: AppBar(
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
-
         title: const Text(
           'Admin Dashboard',
           style: TextStyle(
@@ -76,10 +80,8 @@ class _AdminDashboardScreenState
           ),
         ),
       ),
-
       body: FutureBuilder<List<Order>>(
         future: _loadOrders(),
-
         builder: (context, snapshot) {
           if (snapshot.connectionState ==
               ConnectionState.waiting) {
@@ -130,18 +132,23 @@ class _AdminDashboardScreenState
 
           return FadeTransition(
             opacity: _fadeAnimation,
-
             child: SlideTransition(
               position: _slideAnimation,
-
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-
+                padding: const EdgeInsets.fromLTRB(
+                  16,
+                  16,
+                  16,
+                  24,
+                ),
                 child: Column(
                   crossAxisAlignment:
                       CrossAxisAlignment.start,
-
                   children: [
+                    // =========================
+                    // HEADER
+                    // =========================
+
                     const Text(
                       'Overview',
                       style: TextStyle(
@@ -150,113 +157,181 @@ class _AdminDashboardScreenState
                       ),
                     ),
 
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 4),
 
                     Text(
                       'Manage your store at a glance',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 13,
                         color: Colors.grey.shade600,
                       ),
                     ),
 
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
+
+                    // =========================
+                    // ORDER STATS
+                    // =========================
 
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
                       physics:
                           const NeverScrollableScrollPhysics(),
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 14,
-                      childAspectRatio: 1.0,
-
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 1.35,
                       children: [
                         _buildStatCard(
                           title: 'Total Orders',
                           value: totalOrders,
-                          icon: Icons.shopping_bag_outlined,
+                          icon:
+                              Icons.shopping_bag_outlined,
                           iconColor: Colors.blue,
                         ),
-
                         _buildStatCard(
                           title: 'Pending',
                           value: pendingOrders,
-                          icon: Icons.pending_actions_outlined,
+                          icon:
+                              Icons.pending_actions_outlined,
                           iconColor: Colors.orange,
                         ),
-
                         _buildStatCard(
                           title: 'Shipped',
                           value: shippedOrders,
-                          icon: Icons.local_shipping_outlined,
+                          icon:
+                              Icons.local_shipping_outlined,
                           iconColor: Colors.deepPurple,
                         ),
-
                         _buildStatCard(
                           title: 'Delivered',
                           value: deliveredOrders,
-                          icon: Icons.check_circle_outline,
+                          icon:
+                              Icons.check_circle_outline,
                           iconColor: Colors.green,
                         ),
                       ],
                     ),
 
-                    const SizedBox(height: 1),
+                    const SizedBox(height: 2),
+
+                    // =========================
+                    // SALES
+                    // =========================
 
                     _buildSalesCard(totalSales),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
+
+                    // =========================
+                    // PRODUCT OVERVIEW
+                    // =========================
 
                     const Text(
-                      'Order Summary',
+                      'Product Overview',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
 
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 10),
 
-                    _buildSummaryRow(
-                      title: 'Total Orders',
-                      value: '$totalOrders',
-                      icon: Icons.receipt_long_outlined,
+                    FutureBuilder<List<Product>>(
+                      future: _loadProducts(),
+                      builder: (
+                        context,
+                        productSnapshot,
+                      ) {
+                        if (productSnapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return _buildProductOverviewLoading();
+                        }
+
+                        if (productSnapshot.hasError) {
+                          return _buildProductOverviewError();
+                        }
+
+                        final products =
+                            productSnapshot.data ?? [];
+
+                        final totalProducts =
+                            products.length;
+
+                        final totalCategories = products
+                            .map(
+                              (product) =>
+                                  product.category.trim(),
+                            )
+                            .where(
+                              (category) =>
+                                  category.isNotEmpty,
+                            )
+                            .toSet()
+                            .length;
+
+                        return Row(
+                          children: [
+                            Expanded(
+                              child: _buildProductStatCard(
+                                title: 'Products',
+                                value: totalProducts,
+                                icon:
+                                    Icons.inventory_2_outlined,
+                                iconColor:
+                                    AppTheme.primary,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _buildProductStatCard(
+                                title: 'Categories',
+                                value: totalCategories,
+                                icon:
+                                    Icons.category_outlined,
+                                iconColor: Colors.orange,
+                              ),
+                            ),
+                          ],
+                        );
+                      },
                     ),
 
-                    _buildSummaryRow(
-                      title: 'Pending Orders',
-                      value: '$pendingOrders',
-                      icon: Icons.pending_outlined,
+                    const SizedBox(height: 20),
+
+                    // =========================
+                    // STORE MANAGEMENT
+                    // =========================
+
+                    const Text(
+                      'Store Management',
+                      style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
 
-                    _buildSummaryRow(
-                      title: 'Shipped Orders',
-                      value: '$shippedOrders',
-                      icon: Icons.local_shipping_outlined,
-                    ),
+                    const SizedBox(height: 10),
 
-                    _buildSummaryRow(
-                      title: 'Delivered Orders',
-                      value: '$deliveredOrders',
-                      icon: Icons.done_all_rounded,
-                    ),
+                    _buildManageProductsCard(context),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
+
+                    // =========================
+                    // RECENT ORDERS
+                    // =========================
 
                     Row(
                       mainAxisAlignment:
                           MainAxisAlignment.spaceBetween,
-
                       children: [
                         const Text(
                           'Recent Orders',
                           style: TextStyle(
-                            fontSize: 20,
+                            fontSize: 19,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-
                         TextButton(
                           onPressed: () {
                             Navigator.push(
@@ -277,29 +352,12 @@ class _AdminDashboardScreenState
                       ],
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 6),
 
                     if (orders.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(20),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius:
-                              BorderRadius.circular(16),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'No orders found',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      )
+                      _buildEmptyOrders()
                     else
-                      ...orders.take(3).map((order) {
+                      ...orders.take(2).map((order) {
                         return OrderCard(
                           order: order,
                           onTap: () {
@@ -316,8 +374,6 @@ class _AdminDashboardScreenState
                           },
                         );
                       }),
-
-                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -328,6 +384,10 @@ class _AdminDashboardScreenState
     );
   }
 
+  // =========================
+  // ORDER STAT CARD
+  // =========================
+
   Widget _buildStatCard({
     required String title,
     required int value,
@@ -335,75 +395,76 @@ class _AdminDashboardScreenState
     required Color iconColor,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
-
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-
-      child: Column(
-        crossAxisAlignment:
-            CrossAxisAlignment.start,
-
-        mainAxisAlignment:
-            MainAxisAlignment.spaceBetween,
-
+      child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
-
+            padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
               color: iconColor.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(11),
             ),
-
             child: Icon(
               icon,
               color: iconColor,
-              size: 22,
+              size: 21,
             ),
           ),
 
-          TweenAnimationBuilder<int>(
-            tween: IntTween(
-              begin: 0,
-              end: value,
-            ),
-            duration: const Duration(
-              milliseconds: 900,
-            ),
-            curve: Curves.easeOut,
+          const SizedBox(width: 11),
 
-            builder: (
-              context,
-              animatedValue,
-              child,
-            ) {
-              return Text(
-                '$animatedValue',
-                style: const TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
+          Expanded(
+            child: Column(
+              mainAxisAlignment:
+                  MainAxisAlignment.center,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              children: [
+                TweenAnimationBuilder<int>(
+                  tween: IntTween(
+                    begin: 0,
+                    end: value,
+                  ),
+                  duration:
+                      const Duration(milliseconds: 800),
+                  curve: Curves.easeOut,
+                  builder: (
+                    context,
+                    animatedValue,
+                    child,
+                  ) {
+                    return Text(
+                      '$animatedValue',
+                      style: const TextStyle(
+                        fontSize: 23,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-          ),
 
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
+                const SizedBox(height: 2),
+
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -411,69 +472,70 @@ class _AdminDashboardScreenState
     );
   }
 
+  // =========================
+  // SALES CARD
+  // =========================
+
   Widget _buildSalesCard(double totalSales) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
-
+      padding: const EdgeInsets.symmetric(
+        horizontal: 18,
+        vertical: 16,
+      ),
       decoration: BoxDecoration(
         color: AppTheme.primary,
-        borderRadius: BorderRadius.circular(20),
-
+        borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppTheme.primary.withValues(alpha: 0.20),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
+            color:
+                AppTheme.primary.withValues(alpha: 0.18),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(13),
-
+            padding: const EdgeInsets.all(11),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(14),
+              color:
+                  Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(13),
             ),
-
             child: const Icon(
               Icons.attach_money_rounded,
               color: Colors.white,
-              size: 28,
+              size: 25,
             ),
           ),
 
-          const SizedBox(width: 16),
+          const SizedBox(width: 14),
 
           Expanded(
             child: Column(
               crossAxisAlignment:
                   CrossAxisAlignment.start,
-
               children: [
                 const Text(
                   'Total Sales',
                   style: TextStyle(
                     color: Colors.white70,
-                    fontSize: 14,
+                    fontSize: 13,
                   ),
                 ),
 
-                const SizedBox(height: 5),
+                const SizedBox(height: 3),
 
                 TweenAnimationBuilder<double>(
                   tween: Tween<double>(
                     begin: 0,
                     end: totalSales,
                   ),
-                  duration: const Duration(
-                    milliseconds: 1200,
-                  ),
+                  duration:
+                      const Duration(milliseconds: 1000),
                   curve: Curves.easeOut,
-
                   builder: (
                     context,
                     animatedValue,
@@ -483,7 +545,7 @@ class _AdminDashboardScreenState
                       '\$${animatedValue.toStringAsFixed(2)}',
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 26,
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                     );
@@ -497,57 +559,257 @@ class _AdminDashboardScreenState
     );
   }
 
-  Widget _buildSummaryRow({
+  // =========================
+  // PRODUCT STAT CARD
+  // =========================
+
+  Widget _buildProductStatCard({
     required String title,
-    required String value,
+    required int value,
     required IconData icon,
+    required Color iconColor,
   }) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-
-      padding: const EdgeInsets.all(15),
-
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-
       child: Row(
         children: [
-          Icon(
-            icon,
-            size: 21,
-            color: AppTheme.primary,
-          ),
-
-          const SizedBox(width: 12),
-
-          Expanded(
-            child: Text(
-              title,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(11),
+            ),
+            child: Icon(
+              icon,
+              color: iconColor,
+              size: 21,
             ),
           ),
 
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+          const SizedBox(width: 11),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
+              mainAxisAlignment:
+                  MainAxisAlignment.center,
+              children: [
+                Text(
+                  '$value',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // =========================
+  // MANAGE PRODUCTS
+  // =========================
+
+  Widget _buildManageProductsCard(
+      BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(16),
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const AdminProductsScreen(),
+          ),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(11),
+              decoration: BoxDecoration(
+                color:
+                    AppTheme.primary.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.inventory_2_outlined,
+                color: AppTheme.primary,
+                size: 25,
+              ),
+            ),
+
+            const SizedBox(width: 13),
+
+            Expanded(
+              child: Column(
+                crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Manage Products',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 3),
+
+                  Text(
+                    'Add, edit or remove products',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16,
+              color: Colors.grey.shade500,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // PRODUCT LOADING
+  // =========================
+
+  Widget _buildProductOverviewLoading() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildProductLoadingCard(),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildProductLoadingCard(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProductLoadingCard() {
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Center(
+        child: SizedBox(
+          width: 20,
+          height: 20,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // =========================
+  // PRODUCT ERROR
+  // =========================
+
+  Widget _buildProductOverviewError() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.error_outline,
+            color: Colors.red.shade400,
+          ),
+
+          const SizedBox(width: 10),
+
+          Expanded(
+            child: Text(
+              'Unable to load product overview.',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // =========================
+  // EMPTY ORDERS
+  // =========================
+
+  Widget _buildEmptyOrders() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Center(
+        child: Text(
+          'No orders found',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
