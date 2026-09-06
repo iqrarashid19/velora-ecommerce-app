@@ -22,6 +22,7 @@ The app includes both **customer-facing shopping features** and **admin-side sto
 * 💳 Checkout & Payment Method Selection
 * 📍 Delivery Address Management
 * 📦 Order Placement
+* ✅ Order Confirmation
 * 🧾 My Orders
 * 🚚 Order Tracking
 * ⭐ Product Reviews & Ratings
@@ -32,13 +33,14 @@ The app includes both **customer-facing shopping features** and **admin-side sto
 ### 👨‍💼 Admin Features
 
 * 📊 Admin Dashboard
-* 📦 Order Management
-* 🔄 Update Order Status
+* 📈 Product Overview
 * 🛍️ Product Management
 * ➕ Add Products
 * ✏️ Edit Products
 * 🗑️ Delete Products
-* 📈 Sales / Product Overview
+* 📦 Order Management
+* 🔎 Order Details
+* 🔄 Update Order Status
 * 👥 Admin-only access control
 
 ---
@@ -52,8 +54,8 @@ Velora uses Firebase as its backend infrastructure.
 * **Firebase Authentication**
 
   * User registration
-  * Login
-  * User authentication
+  * User login
+  * Authentication state
 
 * **Cloud Firestore**
 
@@ -66,25 +68,25 @@ Velora uses Firebase as its backend infrastructure.
 
 * **Firestore Security Rules**
 
-  * Authenticated user access
   * User-specific data protection
   * Admin-only product management
   * Protected order status updates
   * Review ownership protection
+  * Authenticated access control
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Technology              | Purpose                          |
-| ----------------------- | -------------------------------- |
-| Flutter                 | Cross-platform UI development    |
-| Dart                    | Application programming language |
-| Provider                | State management                 |
-| Firebase Authentication | User authentication              |
-| Cloud Firestore         | Backend database                 |
-| Material 3              | UI design system                 |
-| Google Fonts            | Typography                       |
+| Technology              | Purpose                                |
+| ----------------------- | -------------------------------------- |
+| Flutter                 | Cross-platform application development |
+| Dart                    | Application programming language       |
+| Provider                | State management                       |
+| Firebase Authentication | User authentication                    |
+| Cloud Firestore         | Backend database                       |
+| Material 3              | UI design system                       |
+| Google Fonts            | Typography                             |
 
 ---
 
@@ -92,45 +94,51 @@ Velora uses Firebase as its backend infrastructure.
 
 ### 🚀 Authentication & Home
 
-| Splash Screen                                  | Login Screen                                  |
-| ---------------------------------------------- | --------------------------------------------- |
-| <img src="screenshots/splash.png" width="280"> | <img src="screenshots/login.png" width="280"> |
+| Splash Screen                            | Login Screen                           |
+| ---------------------------------------- | -------------------------------------- |
+| ![Splash Screen](screenshots/splash.png) | ![Login Screen](screenshots/login.png) |
 
-| Signup Screen                                  | Home Screen                                  |
-| ---------------------------------------------- | -------------------------------------------- |
-| <img src="screenshots/signup.png" width="280"> | <img src="screenshots/home.png" width="280"> |
+| Signup Screen                            | Home Screen                          |
+| ---------------------------------------- | ------------------------------------ |
+| ![Signup Screen](screenshots/signup.png) | ![Home Screen](screenshots/home.png) |
+
+---
 
 ### 🛍️ Shopping Experience
 
-| Product Details                                         | Cart / Checkout                                       |
-| ------------------------------------------------------- | ----------------------------------------------------- |
-| <img src="screenshots/product_details.png" width="280"> | <img src="screenshots/cart_checkout.png" width="280"> |
+| Product Details                                     | Cart / Checkout                                   |
+| --------------------------------------------------- | ------------------------------------------------- |
+| ![Product Details](screenshots/product_details.png) | ![Cart / Checkout](screenshots/cart_checkout.png) |
 
-| Place Order                                         | Order Confirmation                                    |
-| --------------------------------------------------- | ----------------------------------------------------- |
-| <img src="screenshots/place_order.png" width="280"> | <img src="screenshots/order_confirm.png" width="280"> |
+| Place Order                                 | Order Confirmation                                   |
+| ------------------------------------------- | ---------------------------------------------------- |
+| ![Place Order](screenshots/place_order.png) | ![Order Confirmation](screenshots/order_confirm.png) |
 
-| My Orders                                         | Order Tracking                                         |
-| ------------------------------------------------- | ------------------------------------------------------ |
-| <img src="screenshots/my_orders.png" width="280"> | <img src="screenshots/order_tracking.png" width="280"> |
+| My Orders                               | Order Tracking                                    |
+| --------------------------------------- | ------------------------------------------------- |
+| ![My Orders](screenshots/my_orders.png) | ![Order Tracking](screenshots/order_tracking.png) |
 
-| Favorites                                         | Profile                                         |
-| ------------------------------------------------- | ----------------------------------------------- |
-| <img src="screenshots/favorites.png" width="280"> | <img src="screenshots/profile.png" width="280"> |
+| Favorites                               | Profile                             |
+| --------------------------------------- | ----------------------------------- |
+| ![Favorites](screenshots/favorites.png) | ![Profile](screenshots/profile.png) |
+
+---
 
 ### 👨‍💼 Admin Panel
 
-| Admin Dashboard                                         | Manage Products                                         |
-| ------------------------------------------------------- | ------------------------------------------------------- |
-| <img src="screenshots/admin_dashboard.png" width="280"> | <img src="screenshots/manage_products.png" width="280"> |
+| Admin Dashboard                                     | Manage Products                                     |
+| --------------------------------------------------- | --------------------------------------------------- |
+| ![Admin Dashboard](screenshots/admin_dashboard.png) | ![Manage Products](screenshots/manage_products.png) |
 
-| Add Product                                          | Admin Orders                                         |
-| ---------------------------------------------------- | ---------------------------------------------------- |
-| <img src="screenshots/add_products.png" width="280"> | <img src="screenshots/admin_orders.png" width="280"> |
+| Add Product                                  | Admin Orders                                  |
+| -------------------------------------------- | --------------------------------------------- |
+| ![Add Product](screenshots/add_products.png) | ![Admin Orders](screenshots/admin_orders.png) |
 
-| Admin Order Detail                                         |   |
-| ---------------------------------------------------------- | - |
-| <img src="screenshots/admin_order_detail.png" width="280"> |   |
+| Admin Order Detail                                        |   |
+| --------------------------------------------------------- | - |
+| ![Admin Order Detail](screenshots/admin_order_detail.png) |   |
+
+---
 
 ## 🏗️ Project Structure
 
@@ -144,27 +152,34 @@ lib/
 │   ├── product.dart
 │   ├── order.dart
 │   ├── cart_item.dart
+│   ├── category.dart
 │   └── review.dart
 │
 ├── providers/
+│   ├── address_provider.dart
 │   ├── cart_provider.dart
-│   ├── order_provider.dart
 │   ├── favorites_provider.dart
-│   └── address_provider.dart
+│   └── order_provider.dart
 │
 ├── screens/
-│   ├── home_screen.dart
+│   ├── home.dart
+│   ├── login_screen.dart
+│   ├── signup_screen.dart
+│   ├── splash_screen.dart
 │   ├── products_screen.dart
 │   ├── product_details_screen.dart
+│   ├── search_results_screen.dart
+│   ├── favorites_screen.dart
 │   ├── cart_screen.dart
 │   ├── checkout_screen.dart
+│   ├── order_success_screen.dart
 │   ├── orders_screen.dart
-│   ├── order_tracking_screen.dart
-│   ├── favorites_screen.dart
+│   ├── order_details_screen.dart
 │   ├── profile_screen.dart
 │   ├── admin_dashboard_screen.dart
-│   ├── admin_orders_screen.dart
-│   └── ...
+│   ├── admin_products_screen.dart
+│   ├── admin_product_form_screen.dart
+│   └── admin_orders_screen.dart
 │
 ├── services/
 │   └── firestore_service.dart
@@ -173,11 +188,18 @@ lib/
 │   └── app_theme.dart
 │
 ├── widgets/
-│   ├── product_card.dart
+│   ├── add_to_cart_button.dart
+│   ├── address_form.dart
 │   ├── category_item.dart
-│   ├── search_bar.dart
+│   ├── favorite_button.dart
 │   ├── greeting_header.dart
-│   └── ...
+│   ├── order_card.dart
+│   ├── payment_method_selector.dart
+│   ├── payment_option.dart
+│   ├── product_card.dart
+│   ├── promo_banner.dart
+│   ├── search_bar.dart
+│   └── section_title.dart
 │
 ├── firebase_options.dart
 └── main.dart
@@ -187,19 +209,19 @@ lib/
 
 ## 🚀 Getting Started
 
-### 1. Clone the repository
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/iqrarashid19/velora-ecommerce-app.git
 ```
 
-### 2. Navigate to the project
+### 2. Navigate to the Project
 
 ```bash
 cd velora-ecommerce-app
 ```
 
-### 3. Install dependencies
+### 3. Install Dependencies
 
 ```bash
 flutter pub get
@@ -207,13 +229,13 @@ flutter pub get
 
 ### 4. Configure Firebase
 
-Connect the project with your own Firebase project and generate the required Firebase configuration using FlutterFire CLI.
+Connect the project to your own Firebase project and generate the required configuration using FlutterFire CLI.
 
 ```bash
 flutterfire configure
 ```
 
-### 5. Run the application
+### 5. Run the Application
 
 ```bash
 flutter run
@@ -223,11 +245,17 @@ flutter run
 
 ## 🔐 Security
 
-Firebase configuration and sensitive project files should **not** be committed to the repository.
+The project uses **Firestore Security Rules** to protect user-specific data and restrict admin functionality.
 
-The project uses Firestore Security Rules to restrict access to protected data and admin functionality.
+Sensitive Firebase files such as:
 
-For production deployment, Firebase credentials, API configuration, and security rules should be reviewed according to the deployment environment.
+```text
+android/app/google-services.json
+```
+
+are excluded from version control.
+
+Before production deployment, review Firebase configuration, security rules, authentication settings, and environment-specific credentials.
 
 ---
 
@@ -243,12 +271,13 @@ Velora demonstrates practical Flutter development skills including:
 * CRUD operations
 * Role-based admin functionality
 * Shopping cart implementation
+* Checkout flow
 * Order management
+* Order tracking
 * Reviews & ratings
 * Form validation
-* Loading and error handling
+* Loading, error and empty states
 * Protected Firestore data
-* Responsive Material 3 UI
 
 ---
 
@@ -260,7 +289,7 @@ Possible future improvements include:
 * 🔔 Push notifications
 * 📊 Advanced analytics
 * 🖼️ Cloud image management
-* 📱 App deployment to Play Store
+* 📱 Play Store deployment
 * 🎨 Further UI/UX enhancements
 
 ---
