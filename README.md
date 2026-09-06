@@ -88,49 +88,49 @@ Velora uses Firebase as its backend infrastructure.
 
 ---
 
-## 📱 Screenshots
+## 📸 Screenshots
 
 ### 🚀 Authentication & Home
 
-| Splash Screen | Login |
-|---|---|
-| ![Splash Screen](screenshots/splash.png) | ![Login](screenshots/login.png) |
+| Splash Screen                                  | Login Screen                                  |
+| ---------------------------------------------- | --------------------------------------------- |
+| <img src="screenshots/splash.png" width="280"> | <img src="screenshots/login.png" width="280"> |
 
-| Signup | Home |
-|---|---|
-| ![Signup](screenshots/signup.png) | ![Home](screenshots/home.png) |
+| Signup Screen                                  | Home Screen                                  |
+| ---------------------------------------------- | -------------------------------------------- |
+| <img src="screenshots/signup.png" width="280"> | <img src="screenshots/home.png" width="280"> |
 
 ### 🛍️ Shopping Experience
 
-| Product Details | Cart / Checkout |
-|---|---|
-| ![Product Details](screenshots/product_details.png) | ![Cart Checkout](screenshots/cart_checkout.png) |
+| Product Details                                         | Cart / Checkout                                       |
+| ------------------------------------------------------- | ----------------------------------------------------- |
+| <img src="screenshots/product_details.png" width="280"> | <img src="screenshots/cart_checkout.png" width="280"> |
 
-| Place Order | Order Confirmation |
-|---|---|
-| ![Place Order](screenshots/place_order.png) | ![Order Confirmation](screenshots/order_confirm.png) |
+| Place Order                                         | Order Confirmation                                    |
+| --------------------------------------------------- | ----------------------------------------------------- |
+| <img src="screenshots/place_order.png" width="280"> | <img src="screenshots/order_confirm.png" width="280"> |
 
-| My Orders | Order Tracking |
-|---|---|
-| ![My Orders](screenshots/my_orders.png) | ![Order Tracking](screenshots/order_tracking.png) |
+| My Orders                                         | Order Tracking                                         |
+| ------------------------------------------------- | ------------------------------------------------------ |
+| <img src="screenshots/my_orders.png" width="280"> | <img src="screenshots/order_tracking.png" width="280"> |
 
-| Favorites | Profile |
-|---|---|
-| ![Favorites](screenshots/favorites.png) | ![Profile](screenshots/profile.png) |
+| Favorites                                         | Profile                                         |
+| ------------------------------------------------- | ----------------------------------------------- |
+| <img src="screenshots/favorites.png" width="280"> | <img src="screenshots/profile.png" width="280"> |
 
-### 👨‍💼 Admin Dashboard
+### 👨‍💼 Admin Panel
 
-| Admin Dashboard | Manage Products |
-|---|---|
-| ![Admin Dashboard](screenshots/admin_dashboard.png) | ![Manage Products](screenshots/manage_products.png) |
+| Admin Dashboard                                         | Manage Products                                         |
+| ------------------------------------------------------- | ------------------------------------------------------- |
+| <img src="screenshots/admin_dashboard.png" width="280"> | <img src="screenshots/manage_products.png" width="280"> |
 
-| Add Product | Admin Orders |
-|---|---|
-| ![Add Product](screenshots/add_products.png) | ![Admin Orders](screenshots/admin_orders.png) |
+| Add Product                                          | Admin Orders                                         |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| <img src="screenshots/add_products.png" width="280"> | <img src="screenshots/admin_orders.png" width="280"> |
 
-| Admin Order Detail |
-|---|
-| ![Admin Order Detail](screenshots/admin_order_detail.png) |
+| Admin Order Detail                                         |   |
+| ---------------------------------------------------------- | - |
+| <img src="screenshots/admin_order_detail.png" width="280"> |   |
 
 ## 🏗️ Project Structure
 
