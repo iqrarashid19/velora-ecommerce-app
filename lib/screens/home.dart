@@ -36,6 +36,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingProducts = true;
   bool _isAdmin = false;
 
+  String? _productsError;
+
   @override
   void initState() {
     super.initState();
@@ -51,19 +53,41 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  // --------------------------------------------------
+  // LOAD PRODUCTS
+  // --------------------------------------------------
   Future<void> _loadProducts() async {
-    final products = await FirestoreService.fetchProducts();
-
-    if (!mounted) {
-      return;
+    if (mounted) {
+      setState(() {
+        _isLoadingProducts = true;
+        _productsError = null;
+      });
     }
 
-    setState(() {
-      _products = products;
-      _isLoadingProducts = false;
-    });
+    try {
+      final products = await FirestoreService.fetchProducts();
+
+      if (!mounted) return;
+
+      setState(() {
+        _products = products;
+        _isLoadingProducts = false;
+        _productsError = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingProducts = false;
+        _productsError =
+            'Unable to load products right now. Please try again.';
+      });
+    }
   }
 
+  // --------------------------------------------------
+  // CHECK ADMIN
+  // --------------------------------------------------
   Future<void> _checkAdmin() async {
     final user = FirebaseAuth.instance.currentUser;
 
@@ -71,19 +95,166 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    final isAdmin = await FirestoreService.isAdmin(user.uid);
+    try {
+      final isAdmin = await FirestoreService.isAdmin(user.uid);
 
-    if (!mounted) {
-      return;
+      if (!mounted) return;
+
+      setState(() {
+        _isAdmin = isAdmin;
+      });
+    } catch (_) {
+      // If admin check fails, simply keep admin access disabled.
+      if (!mounted) return;
+
+      setState(() {
+        _isAdmin = false;
+      });
     }
-
-    setState(() {
-      _isAdmin = isAdmin;
-    });
   }
 
-  @override
-  Widget build(BuildContext context) {
+  // --------------------------------------------------
+  // EMPTY / ERROR STATE
+  // --------------------------------------------------
+  Widget _buildProductsState() {
+    // ERROR STATE
+    if (_productsError != null) {
+      return SizedBox(
+        height: 300,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.cloud_off_rounded,
+                    size: 42,
+                    color: AppTheme.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                const Text(
+                  'Couldn’t load products',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  _productsError!,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    height: 1.4,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                OutlinedButton.icon(
+                  onPressed: _loadProducts,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Try Again'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.primary,
+                    side: BorderSide(
+                      color: AppTheme.primary,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // EMPTY DATABASE STATE
+    if (_products.isEmpty) {
+      return SizedBox(
+        height: 300,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.inventory_2_outlined,
+                    size: 42,
+                    color: AppTheme.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                const Text(
+                  'No products available',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  'Products will appear here once they are added.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+
+                const SizedBox(height: 14),
+
+                OutlinedButton.icon(
+                  onPressed: _loadProducts,
+                  icon: const Icon(Icons.refresh_rounded),
+                  label: const Text('Refresh'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppTheme.primary,
+                    side: BorderSide(
+                      color: AppTheme.primary,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // SEARCH RESULT EMPTY STATE
     final filteredProducts = _products.where((product) {
       final query = _searchQuery.trim().toLowerCase();
 
@@ -94,6 +265,82 @@ class _HomeScreenState extends State<HomeScreen> {
       return product.name.toLowerCase().contains(query);
     }).toList();
 
+    if (filteredProducts.isEmpty) {
+      return SizedBox(
+        height: 300,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.search_off_rounded,
+                  size: 50,
+                  color: Colors.grey.shade400,
+                ),
+
+                const SizedBox(height: 12),
+
+                const Text(
+                  'No products found',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+
+                const SizedBox(height: 6),
+
+                Text(
+                  'Try searching with a different product name.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // PRODUCTS
+    return SizedBox(
+      height: 300,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        itemCount: filteredProducts.length,
+        separatorBuilder: (context, index) {
+          return const SizedBox(width: 16);
+        },
+        itemBuilder: (context, index) {
+          final product = filteredProducts[index];
+
+          return ProductCard(
+            product: product,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ProductDetailsScreen(
+                    product: product,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.background,
 
@@ -140,7 +387,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ProfileScreen(),
+                  builder: (context) =>
+                      const ProfileScreen(),
                 ),
               );
             },
@@ -173,7 +421,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const OrdersScreen(),
+                  builder: (context) =>
+                      const OrdersScreen(),
                 ),
               );
             },
@@ -211,7 +460,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     tooltip: 'Cart',
                   ),
 
-                  // Cart item count badge
                   if (cart.itemCount > 0)
                     Positioned(
                       right: 2,
@@ -270,7 +518,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 // ------------------------------------------------
                 GreetingHeader(
                   userName:
-                      FirebaseAuth.instance.currentUser?.displayName ??
+                      FirebaseAuth.instance.currentUser
+                              ?.displayName ??
                           'User',
                 ),
 
@@ -328,11 +577,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ListView.separated(
                     scrollDirection: Axis.horizontal,
                     itemCount: categories.length,
-
                     separatorBuilder: (context, index) {
                       return const SizedBox(width: 18);
                     },
-
                     itemBuilder: (context, index) {
                       final category = categories[index];
 
@@ -340,7 +587,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         name: category.name,
                         icon: category.icon,
                         color: category.color,
-
                         onTap: () {
                           Navigator.push(
                             context,
@@ -373,46 +619,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 // FEATURED PRODUCTS
                 // ------------------------------------------------
                 if (_isLoadingProducts)
-                  const SizedBox(
+                  SizedBox(
                     height: 300,
                     child: Center(
-                      child: CircularProgressIndicator(),
+                      child: Column(
+                        mainAxisAlignment:
+                            MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                            ),
+                          ),
+
+                          const SizedBox(height: 12),
+
+                          Text(
+                            'Loading products...',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade600,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
 
                 if (!_isLoadingProducts)
-                  SizedBox(
-                    height: 300,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: filteredProducts.length,
-
-                      separatorBuilder: (context, index) {
-                        return const SizedBox(width: 16);
-                      },
-
-                      itemBuilder: (context, index) {
-                        final product =
-                            filteredProducts[index];
-
-                        return ProductCard(
-                          product: product,
-
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ProductDetailsScreen(
-                                  product: product,
-                                ),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                  _buildProductsState(),
               ],
             ),
           ),

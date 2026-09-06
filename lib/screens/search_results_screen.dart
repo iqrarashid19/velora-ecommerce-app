@@ -21,6 +21,7 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   List<Product> _products = [];
   bool _isLoadingProducts = true;
+  String? _productsError;
 
   @override
   void initState() {
@@ -29,16 +30,131 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   Future<void> _loadProducts() async {
-    final products = await FirestoreService.fetchProducts();
-
-    if (!mounted) {
-      return;
+    if (mounted) {
+      setState(() {
+        _isLoadingProducts = true;
+        _productsError = null;
+      });
     }
 
-    setState(() {
-      _products = products;
-      _isLoadingProducts = false;
-    });
+    try {
+      final products = await FirestoreService.fetchProducts();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _products = products;
+        _isLoadingProducts = false;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoadingProducts = false;
+        _productsError = 'Unable to load products right now.';
+      });
+    }
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text(
+            'Searching products...',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 58,
+              color: Colors.grey.shade500,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Couldn’t load products',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please check your internet connection and try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _loadProducts,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try Again'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptySearchState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off_rounded,
+              size: 60,
+              color: Colors.grey.shade500,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No products found',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Try searching for another product or category.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -57,6 +173,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         backgroundColor: AppTheme.primary,
         foregroundColor: Colors.white,
         elevation: 0,
+        surfaceTintColor: Colors.transparent,
         title: Text(
           'Search: ${widget.query}',
           style: const TextStyle(
@@ -66,88 +183,64 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       ),
 
       body: _isLoadingProducts
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : results.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.search_off_rounded,
-                        size: 60,
-                        color: Colors.grey,
-                      ),
-
-                      SizedBox(height: 16),
-
-                      Text(
-                        'No products found',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+          ? _buildLoadingState()
+          : _productsError != null
+              ? _buildErrorState()
+              : results.isEmpty
+                  ? _buildEmptySearchState()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(
+                            16,
+                            20,
+                            16,
+                            4,
+                          ),
+                          child: Text(
+                            '${results.length} product${results.length == 1 ? '' : 's'} found',
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
                         ),
-                      ),
 
-                      SizedBox(height: 6),
+                        Expanded(
+                          child: GridView.builder(
+                            padding: const EdgeInsets.all(16),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 14,
+                              mainAxisSpacing: 14,
+                              childAspectRatio: 0.53,
+                            ),
+                            itemCount: results.length,
+                            itemBuilder: (context, index) {
+                              final product = results[index];
 
-                      Text(
-                        'Try searching for another product.',
-                        style: TextStyle(
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
-                      child: Text(
-                        '${results.length} product${results.length == 1 ? '' : 's'} found',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ),
-
-                    Expanded(
-                      child: GridView.builder(
-                        padding: const EdgeInsets.all(16),
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 14,
-                          mainAxisSpacing: 14,
-                          childAspectRatio: 0.53,
-                        ),
-                        itemCount: results.length,
-                        itemBuilder: (context, index) {
-                          final product = results[index];
-
-                          return ProductCard(
-                            product: product,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ProductDetailsScreen(
-                                    product: product,
-                                  ),
-                                ),
+                              return ProductCard(
+                                product: product,
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ProductDetailsScreen(
+                                        product: product,
+                                      ),
+                                    ),
+                                  );
+                                },
                               );
                             },
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
     );
   }
 }

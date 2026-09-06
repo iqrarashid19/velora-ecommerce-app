@@ -24,6 +24,9 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   String _selectedPaymentMethod = 'Cash on Delivery';
 
+  // Prevents duplicate order submission.
+  bool _isPlacingOrder = false;
+
   void _showPaymentMethods() {
     showModalBottomSheet(
       context: context,
@@ -104,6 +107,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Future<void> _placeOrder() async {
+    // Prevent double tap / duplicate submission.
+    if (_isPlacingOrder) {
+      return;
+    }
+
     final addressProvider = context.read<AddressProvider>();
     final cart = context.read<CartProvider>();
 
@@ -150,6 +158,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       return;
     }
+
+    // Lock the button while order is being placed.
+    setState(() {
+      _isPlacingOrder = true;
+    });
 
     final deliveryFee =
         cart.totalAmount >= 100 ? 0.0 : 5.0;
@@ -203,6 +216,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (!mounted) {
         return;
       }
+
+      setState(() {
+        _isPlacingOrder = false;
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -272,7 +289,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 onTap: _showAddressForm,
               ),
 
-              const SizedBox(height:6),
+              const SizedBox(height: 6),
 
               const Text(
                 'Contact Information',
@@ -324,7 +341,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 onTap: _showPaymentMethods,
               ),
 
-              const SizedBox(height:6),
+              const SizedBox(height: 6),
 
               const Text(
                 'Order Summary',
@@ -352,7 +369,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           '\$${cart.totalAmount.toStringAsFixed(2)}',
                     ),
 
-                    const SizedBox(height:6),
+                    const SizedBox(height: 6),
 
                     _SummaryRow(
                       title: 'Delivery',
@@ -375,18 +392,25 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ),
               ),
 
-              const SizedBox(height:6),
+              const SizedBox(height: 6),
 
               SizedBox(
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: _placeOrder,
+                  onPressed:
+                      _isPlacingOrder
+                          ? null
+                          : _placeOrder,
                   style:
                       ElevatedButton.styleFrom(
                     backgroundColor:
                         const Color(0xFF171717),
                     foregroundColor:
+                        Colors.white,
+                    disabledBackgroundColor:
+                        const Color(0xFF171717),
+                    disabledForegroundColor:
                         Colors.white,
                     elevation: 0,
                     shape:
@@ -395,14 +419,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           BorderRadius.circular(16),
                     ),
                   ),
-                  child: const Text(
-                    'Place Order',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight:
-                          FontWeight.bold,
-                    ),
-                  ),
+                  child: _isPlacingOrder
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child:
+                              CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Place Order',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold,
+                          ),
+                        ),
                 ),
               ),
 

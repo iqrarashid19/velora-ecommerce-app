@@ -3,7 +3,7 @@ import 'package:e_commerce_app/data/products.dart';
 import 'package:e_commerce_app/models/product.dart';
 import 'package:e_commerce_app/models/order.dart' as app_order;
 import 'package:e_commerce_app/models/cart_item.dart';
-
+import 'package:e_commerce_app/models/review.dart';
 class FirestoreService {
   static Future<void> uploadProducts() async {
     final firestore = FirebaseFirestore.instance;
@@ -334,5 +334,74 @@ class FirestoreService {
                 : null,
       );
     }).toList();
+  }
+  // =========================
+  // REVIEWS & RATINGS
+  // =========================
+
+  static Future<void> saveReview({
+    required String productId,
+    required String userId,
+    required String userName,
+    required double rating,
+    required String comment,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .doc(userId)
+        .set({
+      'userId': userId,
+      'userName': userName,
+      'rating': rating,
+      'comment': comment,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  static Future<List<Review>> fetchReviews(
+    String productId,
+  ) async {
+    final snapshot = await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .orderBy('createdAt', descending: true)
+        .get();
+
+    return snapshot.docs
+        .map((doc) => Review.fromFirestore(doc))
+        .toList();
+  }
+
+  static Future<Review?> fetchUserReview({
+    required String productId,
+    required String userId,
+  }) async {
+    final doc = await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .doc(userId)
+        .get();
+
+    if (!doc.exists) {
+      return null;
+    }
+
+    return Review.fromFirestore(doc);
+  }
+
+  static Future<void> deleteReview({
+    required String productId,
+    required String userId,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection('products')
+        .doc(productId)
+        .collection('reviews')
+        .doc(userId)
+        .delete();
   }
 }

@@ -1,218 +1,274 @@
-# Velora 🛍️
+# 🛍️ Velora — Modern Flutter E-Commerce App
 
-A modern and responsive e-commerce mobile application built with **Flutter and Dart**, focused on a clean shopping experience, smooth navigation, and a polished user interface.
+Velora is a modern **Flutter e-commerce application** built to demonstrate a complete shopping experience with **Firebase Authentication, Cloud Firestore, Provider state management, and a dedicated Admin Dashboard**.
+
+The app includes both **customer-facing shopping features** and **admin-side store management**, making it a complete portfolio-level Flutter project.
+
+---
 
 ## ✨ Features
 
+### 👤 Customer Features
+
+* 🔐 Firebase Email & Password Authentication
 * 🏠 Modern Home Screen
 * 🔎 Product Search
 * 🗂️ Product Categories
-* 🎨 Animated Promotional Banners
-* ⭐ Featured Products
-* 🛍️ Product Details
+* 🛍️ Product Listing & Filtering
+* 📦 Product Details
 * ❤️ Favorites / Wishlist
 * 🛒 Shopping Cart
-* 🔃 Product Sorting
-* 📦 Order Management
-* 📋 Order Details
+* ➕➖ Cart Quantity Management
+* 💳 Checkout & Payment Method Selection
+* 📍 Delivery Address Management
+* 📦 Order Placement
+* 🧾 My Orders
+* 🚚 Order Tracking
+* ⭐ Product Reviews & Ratings
 * 👤 User Profile
-* 🎨 Consistent Custom Theme
-* 📱 Responsive Flutter UI
+* 🔄 Order Status Updates
+* ⚡ Loading, Error & Empty States
+
+### 👨‍💼 Admin Features
+
+* 📊 Admin Dashboard
+* 📦 Order Management
+* 🔄 Update Order Status
+* 🛍️ Product Management
+* ➕ Add Products
+* ✏️ Edit Products
+* 🗑️ Delete Products
+* 📈 Sales / Product Overview
+* 👥 Admin-only access control
+
+---
+
+## 🔥 Firebase Integration
+
+Velora uses Firebase as its backend infrastructure.
+
+### Firebase Services
+
+* **Firebase Authentication**
+
+  * User registration
+  * Login
+  * User authentication
+
+* **Cloud Firestore**
+
+  * Products
+  * Users
+  * Orders
+  * Favorites
+  * Reviews
+  * Admin data
+
+* **Firestore Security Rules**
+
+  * Authenticated user access
+  * User-specific data protection
+  * Admin-only product management
+  * Protected order status updates
+  * Review ownership protection
+
+---
 
 ## 🛠️ Tech Stack
 
-* **Flutter**
-* **Dart**
-* **Provider** — State Management
-* **Material 3**
+| Technology              | Purpose                          |
+| ----------------------- | -------------------------------- |
+| Flutter                 | Cross-platform UI development    |
+| Dart                    | Application programming language |
+| Provider                | State management                 |
+| Firebase Authentication | User authentication              |
+| Cloud Firestore         | Backend database                 |
+| Material 3              | UI design system                 |
+| Google Fonts            | Typography                       |
 
-## 📁 Project Structure
+---
+
+## 📱 Screenshots
+
+> Screenshots will be added to this section as the project showcase is finalized.
+
+### Home
+
+`/screenshots/home.png`
+
+### Product Details
+
+`/screenshots/product_details.png`
+
+### Cart & Checkout
+
+`/screenshots/cart_checkout.png`
+
+### My Orders
+
+`/screenshots/my_orders.png`
+
+### Order Tracking
+
+`/screenshots/order_tracking.png`
+
+### Favorites
+
+`/screenshots/favorites.png`
+
+### Admin Dashboard
+
+`/screenshots/admin_dashboard.png`
+
+### Admin Order Management
+
+`/screenshots/admin_orders.png`
+
+---
+
+## 🏗️ Project Structure
 
 ```text
 lib/
 ├── data/
+│   ├── categories.dart
+│   └── products.dart
+│
 ├── models/
+│   ├── product.dart
+│   ├── order.dart
+│   ├── cart_item.dart
+│   └── review.dart
+│
 ├── providers/
+│   ├── cart_provider.dart
+│   ├── order_provider.dart
+│   ├── favorites_provider.dart
+│   └── address_provider.dart
+│
 ├── screens/
+│   ├── home_screen.dart
+│   ├── products_screen.dart
+│   ├── product_details_screen.dart
+│   ├── cart_screen.dart
+│   ├── checkout_screen.dart
+│   ├── orders_screen.dart
+│   ├── order_tracking_screen.dart
+│   ├── favorites_screen.dart
+│   ├── profile_screen.dart
+│   ├── admin_dashboard_screen.dart
+│   ├── admin_orders_screen.dart
+│   └── ...
+│
+├── services/
+│   └── firestore_service.dart
+│
 ├── theme/
+│   └── app_theme.dart
+│
 ├── widgets/
+│   ├── product_card.dart
+│   ├── category_item.dart
+│   ├── search_bar.dart
+│   ├── greeting_header.dart
+│   └── ...
+│
+├── firebase_options.dart
 └── main.dart
+```
 
-assets/
-└── images/
+---
 
 ## 🚀 Getting Started
 
-### Prerequisites
-
-Make sure you have the following installed:
-
-* Flutter SDK
-* Dart SDK
-* Android Studio or VS Code
-* Android Emulator or a physical Android device
-
-### Installation
-
-Clone the repository:
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/iqrarashid19/velora-ecommerce-app.git
 ```
 
-Navigate to the project directory:
+### 2. Navigate to the project
 
 ```bash
 cd velora-ecommerce-app
 ```
 
-Install the required dependencies:
+### 3. Install dependencies
 
 ```bash
 flutter pub get
 ```
 
-Run the application:
+### 4. Configure Firebase
+
+Connect the project with your own Firebase project and generate the required Firebase configuration using FlutterFire CLI.
+
+```bash
+flutterfire configure
+```
+
+### 5. Run the application
 
 ```bash
 flutter run
 ```
 
-## 📱 Application Screens
+---
 
-The application includes:
+## 🔐 Security
 
-* Splash Screen
-* Home Screen
-* Product Listing
-* Product Details
-* Search Results
-* Favorites / Wishlist
-* Shopping Cart
-* Checkout
-* Order Success
-* Orders
-* Order Details
-* User Profile
+Firebase configuration and sensitive project files should **not** be committed to the repository.
 
-## 📸 Screenshots
+The project uses Firestore Security Rules to restrict access to protected data and admin functionality.
 
-Screenshots of the application will be added here.
+For production deployment, Firebase credentials, API configuration, and security rules should be reviewed according to the deployment environment.
 
-> More screenshots will be added as the project continues to evolve.
+---
 
-## 🎯 Project Purpose
+## 🎯 What This Project Demonstrates
 
-Velora was developed as a Flutter e-commerce application to practice and demonstrate modern mobile application development concepts, including:
+Velora demonstrates practical Flutter development skills including:
 
-* Flutter UI development
-* Responsive layouts
+* Clean Flutter project organization
 * Reusable widgets
 * Provider-based state management
-* Navigation between screens
-* Product categorization
-* Product filtering and sorting
-* Shopping cart management
-* Favorites / wishlist functionality
+* Firebase Authentication
+* Cloud Firestore integration
+* CRUD operations
+* Role-based admin functionality
+* Shopping cart implementation
 * Order management
-* Checkout flow
-* Asset management
-* Custom application theming
-* Material 3 design
+* Reviews & ratings
+* Form validation
+* Loading and error handling
+* Protected Firestore data
+* Responsive Material 3 UI
 
-## 🧩 State Management
+---
 
-The application uses **Provider** for managing application state.
-
-Current providers include:
-
-* `CartProvider`
-* `FavoritesProvider`
-* `OrderProvider`
-* `AddressProvider`
-
-These providers handle application functionality such as cart items, favorite products, orders, and delivery address information.
-
-## 🎨 UI & Design
-
-Velora follows a clean and modern e-commerce design approach with:
-
-* Custom application theme
-* Material 3 components
-* Consistent typography
-* Reusable UI components
-* Product cards
-* Promotional banners
-* Category cards
-* Responsive layouts
-* Smooth navigation between screens
-
-## 🔄 Application Flow
-
-```text
-Splash Screen
-      ↓
-Home Screen
-      ↓
-Product Categories / Featured Products
-      ↓
-Product Listing
-      ↓
-Product Details
-      ↓
-Add to Cart
-      ↓
-Shopping Cart
-      ↓
-Checkout
-      ↓
-Order Success
-      ↓
-Orders
-      ↓
-Order Details
-```
-
-Users can also:
-
-```text
-Home
- ├── Search Products
- ├── Browse Categories
- ├── View Featured Products
- ├── Add Products to Favorites
- └── View Product Details
-```
-
-## 📦 Current Project Status
-
-**Status:** 🚧 In Development
-
-The core e-commerce interface and shopping flow have been implemented. Additional functionality, refinements, and production-level integrations may be added as development continues.
-
-## 🔮 Future Improvements
+## 📌 Future Improvements
 
 Possible future improvements include:
 
-* 🔐 User Authentication
-* ☁️ Firebase Backend Integration
-* 🗄️ Cloud Database
-* 💳 Online Payment Integration
-* 📍 Real-time Address / Location Services
-* 🔔 Push Notifications
-* 🧾 Advanced Order Tracking
-* 👨‍💼 Admin Dashboard
-* 📊 Product & Sales Analytics
-* 🌐 Backend API Integration
+* 💳 Online payment gateway integration
+* 🔔 Push notifications
+* 📊 Advanced analytics
+* 🖼️ Cloud image management
+* 📱 App deployment to Play Store
+* 🎨 Further UI/UX enhancements
 
-## 👨‍💻 Author
+---
+
+## 👨‍💻 Developer
 
 **Iqra Rashid**
 
 Flutter & Dart Developer
 
-Built with ❤️ using **Flutter & Dart**.
+Built as a portfolio project to demonstrate modern mobile application development with Flutter and Firebase.
 
-## 📄 License
+---
 
-This project is created for learning, development, and portfolio purposes.
+## ⭐ Support
+
+If you find this project useful or interesting, consider giving the repository a ⭐ on GitHub.

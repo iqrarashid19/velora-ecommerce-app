@@ -23,6 +23,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   List<Product> _products = [];
   bool _isLoadingProducts = true;
+  String? _productsError;
 
   @override
   void initState() {
@@ -31,16 +32,145 @@ class _ProductsScreenState extends State<ProductsScreen> {
   }
 
   Future<void> _loadProducts() async {
-    final products = await FirestoreService.fetchProducts();
-
-    if (!mounted) {
-      return;
+    if (mounted) {
+      setState(() {
+        _isLoadingProducts = true;
+        _productsError = null;
+      });
     }
 
-    setState(() {
-      _products = products;
-      _isLoadingProducts = false;
-    });
+    try {
+      final products = await FirestoreService.fetchProducts();
+
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _products = products;
+        _isLoadingProducts = false;
+      });
+    } catch (e) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isLoadingProducts = false;
+        _productsError = 'Unable to load products right now.';
+      });
+    }
+  }
+
+  Widget _buildLoadingState() {
+    return const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(height: 16),
+          Text(
+            'Loading products...',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.cloud_off_rounded,
+              size: 58,
+              color: Colors.grey.shade500,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Couldn’t load products',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please check your internet connection and try again.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: _loadProducts,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try Again'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    final bool isCategorySelected = widget.category != null;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              isCategorySelected
+                  ? Icons.inventory_2_outlined
+                  : Icons.shopping_bag_outlined,
+              size: 58,
+              color: Colors.grey.shade500,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isCategorySelected
+                  ? 'No products in this category'
+                  : 'No products available',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isCategorySelected
+                  ? 'Try another category to explore more products.'
+                  : 'Products will appear here once they are added.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 20),
+            OutlinedButton.icon(
+              onPressed: _loadProducts,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -95,9 +225,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
           PopupMenuButton<String>(
             icon: const Icon(
               Icons.sort_rounded,
-           
             ),
-
             tooltip: 'Sort Products',
 
             onSelected: (value) {
@@ -115,7 +243,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       const Icon(
                         Icons.restart_alt_rounded,
                         size: 20,
-                      color: Color(0xFF171717),
+                        color: Color(0xFF171717),
                       ),
                       const SizedBox(width: 10),
                       const Text('Default'),
@@ -138,7 +266,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       const Icon(
                         Icons.arrow_upward_rounded,
                         size: 20,
-                      color: Color(0xFF171717),
+                        color: Color(0xFF171717),
                       ),
                       const SizedBox(width: 10),
                       const Text('Price: Low to High'),
@@ -161,7 +289,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       const Icon(
                         Icons.arrow_downward_rounded,
                         size: 20,
-                      color: Color(0xFF171717),
+                        color: Color(0xFF171717),
                       ),
                       const SizedBox(width: 10),
                       const Text('Price: High to Low'),
@@ -184,7 +312,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       const Icon(
                         Icons.star_rounded,
                         size: 20,
-                      color: Color(0xFF171717),
+                        color: Color(0xFF171717),
                       ),
                       const SizedBox(width: 10),
                       const Text('Rating: Highest'),
@@ -207,7 +335,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
                       const Icon(
                         Icons.sort_by_alpha_rounded,
                         size: 20,
-                       color: Color(0xFF171717),
+                        color: Color(0xFF171717),
                       ),
                       const SizedBox(width: 10),
                       const Text('Name: A to Z'),
@@ -232,52 +360,44 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
       body: SafeArea(
         child: _isLoadingProducts
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : filteredProducts.isEmpty
-                ? const Center(
-                    child: Text(
-                      'No products found.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  )
-                : GridView.builder(
-                    padding: const EdgeInsets.all(16),
+            ? _buildLoadingState()
+            : _productsError != null
+                ? _buildErrorState()
+                : filteredProducts.isEmpty
+                    ? _buildEmptyState()
+                    : GridView.builder(
+                        padding: const EdgeInsets.all(16),
 
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14,
-                      mainAxisSpacing: 16,
-                      childAspectRatio: 0.53,
-                    ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 14,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 0.53,
+                        ),
 
-                    itemCount: filteredProducts.length,
+                        itemCount: filteredProducts.length,
 
-                    itemBuilder: (context, index) {
-                      final product = filteredProducts[index];
+                        itemBuilder: (context, index) {
+                          final product = filteredProducts[index];
 
-                      return ProductCard(
-                        product: product,
+                          return ProductCard(
+                            product: product,
 
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ProductDetailsScreen(
-                                product: product,
-                              ),
-                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      ProductDetailsScreen(
+                                    product: product,
+                                  ),
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                  ),
+                      ),
       ),
     );
   }
